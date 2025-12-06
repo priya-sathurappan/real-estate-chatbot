@@ -1,0 +1,115 @@
+# Real-estate-assistant
+
+This repository contains code for a small RAG-style (Retrieval Augmented Generation) assistant used in an AI course. The project uses a Chroma vector store located under `resources/vectordb/` and Python scripts such as `main.py` and `RAG.py`.
+
+---
+
+## Quick setup (Windows, PowerShell)
+
+1. Create a virtual environment in the project folder (recommended name: `.venv`):
+
+```powershell
+python -m venv .venv
+```
+
+2. (Optional) If PowerShell prevents running activation scripts, allow the current session to run local scripts:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force
+```
+
+3. Activate the virtual environment (PowerShell):
+
+```powershell
+# Preferred for PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# Alternative that works in cmd.exe (use from Command Prompt)
+.\.venv\Scripts\activate.bat
+
+# You can also use the cross-shell entrypoint from PowerShell
+.\.venv\Scripts\Activate
+```
+
+You should see your prompt change to show the virtual environment name (for example `(.venv)`).
+
+4. Install Python dependencies:
+
+```powershell
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+---
+
+## Run the project
+
+- To run the main script (example):
+
+```powershell
+python main.py
+```
+
+- To run the RAG script (example):
+
+```powershell
+python RAG.py
+```
+
+Adjust whichever entrypoint you need; these are examples only.
+
+---
+
+## PyCharm: open terminal and keep it docked in the sidebar
+
+- Open the integrated terminal: View -> Tool Windows -> Terminal, or press Alt+F12 (toggle).
+- If the terminal is floating or undocked, dock it to a side:
+  1. Look for the terminal tab or the terminal tool window title bar.
+  2. Click the gear icon (Settings) on the terminal tool window or right-click the terminal tab.
+  3. Choose "Docked" (or "Move to" -> Left/Right) to pin it to the side.
+- You can also drag the tool window by its title bar and drop it on the left/right edge to re-dock it.
+
+This keeps the terminal consistently visible in the sidebar while you code.
+
+---
+
+## About `vector_Store.similarity_search(query, k=N)`
+
+- Purpose: perform a semantic search in the Chroma vector store for the top `N` most similar documents (chunks) to a natural language query.
+
+- Return value: a list of LangChain `Document` objects. Each `Document` exposes at least:
+  - `page_content` (str): the text of the chunk.
+  - `metadata` (dict): metadata associated with the chunk (for example, `source`, `page`, or custom tags).
+
+- Note: The items returned are the top `k` chunks (not entire original files). The chunks are created by your text splitter (for example `RecursiveCharacterTextSplitter` with `chunk_size` and `chunk_overlap`).
+
+Example usage to inspect results (Python):
+
+```python
+query = "why did the Bangalore techie die?"
+results = vector_Store.similarity_search(query, k=2)
+
+for i, doc in enumerate(results, start=1):
+    print(f"Result {i} — first 400 chars:\n{doc.page_content[:400]}\n")
+    print("metadata:", doc.metadata)
+    print("-" * 80)
+```
+
+This prints the top-2 most similar chunks and their metadata. If you need aggregated context across multiple chunks, consider concatenating returned `page_content` values before sending to your LLM.
+
+---
+
+## Notes & Troubleshooting
+
+- If activation fails in PowerShell due to execution policy, the `Set-ExecutionPolicy` command above will let the current session run local scripts without changing global settings.
+- The repository already contains a Chroma DB at `resources/vectordb/` — do not delete it unless you intend to rebuild the vector store.
+- If you add new documents and want them reflected in the vector DB, re-run your indexing script (the project may include code to build/update the Chroma store).
+
+---
+
+If you'd like, I can also:
+- Add a small `README.md` (GitHub-flavored) and keep this local `.README` as a short developer guide.
+- Add a short script to create and activate the virtualenv automatically.
+- Add example unit tests that validate `similarity_search` returns `Document` objects.
+
+
